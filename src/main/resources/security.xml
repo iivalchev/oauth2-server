@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                 http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                 http://www.springframework.org/schema/security
+                 http://www.springframework.org/schema/security/spring-security-3.2.xsd
+                 http://www.springframework.org/schema/security/oauth2
+                 http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
+
+
+    <!-- Begin OAuth2 Client Authentication Manager configuration -->
+    <oauth:client-details-service id="clientDetails">
+        <oauth:client client-id="client"
+                      secret="secret"
+                      authorities="ROLE_APP"
+                      authorized-grant-types="authorization_code"
+                      scope="trust"/>
+    </oauth:client-details-service>
+
+    <authentication-manager id="clientAuthenticationManager">
+        <authentication-provider user-service-ref="clientDetailsUserService"/>
+    </authentication-manager>
+    <!-- End OAuth2 Client Authentication Manager configuration -->
+
+    <!-- Begin Security configuration for /oauth/token -->
+    <bean id="clientAuthenticationEntryPoint"
+          class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+        <property name="typeName" value="Basic" />
+    </bean>
+
+    <bean id="oauthAccessDeniedHandler"
+          class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler">
+    </bean>
+
+    <http pattern="/oauth/token" create-session="stateless"
+              authentication-manager-ref="clientAuthenticationManager">
+        <intercept-url pattern="/oauth/token" access="isFullyAuthenticated()"/>
+        <anonymous enabled="false"/>
+        <http-basic entry-point-ref="clientAuthenticationEntryPoint" />
+        <access-denied-handler ref="oauthAccessDeniedHandler" />
+    </http>
+    <!-- End Security configuration for /oauth/token -->
+
+    <!-- End User Authentication Manager Config -->
+    <authentication-manager id="userAuthenticationManager">
+        <authentication-provider>
+            <user-service>
+                <user name="user" password="pass" authorities="ROLE_USER" />
+            </user-service>
+        </authentication-provider>
+    </authentication-manager>
+
+    <!-- Security configuration for /oauth/authorize and /oauth/confirm_access -->
+    <http create-session="ifRequired" use-expressions="true"
+          authentication-manager-ref="userAuthenticationManager">
+        <intercept-url pattern="/oauth/authorize" access="hasRole('ROLE_USER')"/>
+        <intercept-url pattern="/oauth/confirm_access" access="hasRole('ROLE_USER')"/>
+        <anonymous enabled="false"/>
+        <form-login/>
+    </http>
+
+    <oauth:authorization-server client-details-service-ref="clientDetails">
+        <oauth:authorization-code/>
+    </oauth:authorization-server>
+
+</beans:beans>
