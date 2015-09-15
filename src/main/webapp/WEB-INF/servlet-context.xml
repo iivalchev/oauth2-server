@@ -10,4 +10,7 @@
     <context:component-scan base-package="com.estafet.examples"/>
     <context:annotation-config/>
     <import resource="mvc-configuration.xml"/>
+
+    <bean id="approvalStore" class="org.springframework.security.oauth2.provider.approval.InMemoryApprovalStore"/>
+
 </beans>

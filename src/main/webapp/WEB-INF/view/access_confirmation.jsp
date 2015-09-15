@@ -55,9 +55,9 @@
 						</c:set>
 						<li>
 							<div class="form-group">
-								${scope.key}: <input type="radio" name="${scope.key}"
-									value="true" ${approved}>Approve</input> <input type="radio"
-									name="${scope.key}" value="false" ${denied}>Deny</input>
+								${scope.key}:
+								<input type="radio" name="${scope.key}"	value="true" ${approved}>Approve</input>
+								 <input type="radio" name="${scope.key}" value="false" ${denied}>Deny</input>
 							</div>
 						</li>
 					</c:forEach>
